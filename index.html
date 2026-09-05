@@ -45,7 +45,7 @@
   }
   .summary {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
     margin: -20px 0 24px;
   }
@@ -71,6 +71,8 @@
   .card.collection .value { color: var(--green); }
   .card.expense .value { color: var(--red); }
   .card.balance .value { color: var(--dark-orange); }
+  .card.cash .value { color: var(--dark-orange); }
+  .card.upi .value { color: #1E6FA6; }
 
   .tabs {
     display: flex;
@@ -102,6 +104,7 @@
 
   table {
     width: 100%;
+    min-width: 480px;
     border-collapse: collapse;
     background: #fff;
     border-radius: 8px;
@@ -109,6 +112,13 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     margin-bottom: 10px;
   }
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .table-wrap table { margin-bottom: 0; }
   th, td {
     padding: 9px 10px;
     text-align: left;
@@ -222,6 +232,20 @@
     .tabs, .form-box, .print-btn, header p { display: none !important; }
     header { background: #fff !important; color: var(--dark-orange) !important; }
   }
+  @media (max-width: 480px) {
+    header { padding: 22px 12px 18px; }
+    header h1 { font-size: 1.3rem; letter-spacing: 0.5px; }
+    header p { font-size: 0.85rem; }
+    .container { padding: 16px 10px 50px; }
+    .summary { margin-top: -14px; }
+    .card { padding: 12px 8px; }
+    .card .value { font-size: 1.1rem; }
+    .card .label { font-size: 0.68rem; }
+    .two-col { grid-template-columns: 1fr; gap: 0; }
+    .tab-btn { min-width: 100px; font-size: 0.82rem; padding: 9px 10px; }
+    .form-box { padding: 14px; }
+    th, td { padding: 7px 8px; font-size: 0.8rem; }
+  }
 </style>
 </head>
 <body>
@@ -248,8 +272,12 @@
       <div class="value" id="totalExpenses">₹0</div>
     </div>
     <div class="card balance">
-      <div class="label">Balance in Hand</div>
-      <div class="value" id="balance">₹0</div>
+      <div class="label">Cash in Hand</div>
+      <div class="value" id="cashInHand">₹0</div>
+    </div>
+    <div class="card upi">
+      <div class="label">Cash in Bank (UPI)</div>
+      <div class="value" id="cashInBank">₹0</div>
     </div>
   </div>
 
@@ -263,6 +291,7 @@
     <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
 
     <div class="section-title">Donations / Chanda Collected</div>
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -272,8 +301,10 @@
       </thead>
       <tbody id="donationsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
     </table>
+    </div>
 
     <div class="section-title">Expenses</div>
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -283,6 +314,7 @@
       </thead>
       <tbody id="expensesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
     </table>
+    </div>
   </div>
 
   <!-- ADD PANEL -->
@@ -433,6 +465,12 @@
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
+  function sumByMode(rows, mode) {
+    return rows
+      .filter(r => (r["Payment Mode"] || "Cash") === mode)
+      .reduce((sum, r) => sum + (Number(r["Amount"]) || 0), 0);
+  }
+
   function showConfigWarningIfNeeded() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
       document.getElementById("configWarning").style.display = "block";
@@ -448,7 +486,12 @@
       const data = await res.json();
       document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
       document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
-      document.getElementById("balance").textContent = fmt(data.balance);
+
+      const cashInHand = sumByMode(data.donations || [], "Cash") - sumByMode(data.expenses || [], "Cash");
+      const cashInBank = sumByMode(data.donations || [], "UPI") - sumByMode(data.expenses || [], "UPI");
+      document.getElementById("cashInHand").textContent = fmt(cashInHand);
+      document.getElementById("cashInBank").textContent = fmt(cashInBank);
+
       renderDonations(data.donations || []);
       renderExpenses(data.expenses || []);
     } catch (err) {
