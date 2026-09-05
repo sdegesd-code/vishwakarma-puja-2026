@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishwakarma Puja 2026 — Accounts</title>
+<style>
+  :root {
+    --orange: #C1440E;
+    --dark-orange: #8A2E0A;
+    --gold: #D4A017;
+    --light-bg: #FDF1E4;
+    --text-dark: #3A2312;
+    --green: #1E7B34;
+    --red: #B3261E;
+    --border: #E8C9A0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #FFF9F3;
+    color: var(--text-dark);
+  }
+  header {
+    background: linear-gradient(135deg, var(--orange), var(--dark-orange));
+    color: #fff;
+    text-align: center;
+    padding: 28px 16px 22px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    letter-spacing: 1px;
+  }
+  header p {
+    margin: 6px 0 0;
+    color: #FDE7D2;
+    font-size: 0.95rem;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: -20px 0 24px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 10px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .card .label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8a6a4d;
+    margin-bottom: 6px;
+  }
+  .card .value {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .card.collection .value { color: var(--green); }
+  .card.expense .value { color: var(--red); }
+  .card.balance .value { color: var(--dark-orange); }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--dark-orange);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .tab-btn.active {
+    background: var(--orange);
+    color: #fff;
+    border-color: var(--orange);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .subpanel { display: none; }
+  .subpanel.active { display: block; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+  }
+  th, td {
+    padding: 9px 10px;
+    text-align: left;
+    font-size: 0.87rem;
+    border-bottom: 1px solid #F1E2CC;
+  }
+  th {
+    background: var(--orange);
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.amount, th.amount { text-align: right; white-space: nowrap; }
+  .empty-row td {
+    text-align: center;
+    color: #a08765;
+    font-style: italic;
+    padding: 18px;
+  }
+
+  .form-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .form-box h3 {
+    margin-top: 0;
+    color: var(--dark-orange);
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+  .form-row label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #6b4a2c;
+  }
+  .form-row input, .form-row select {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  button.submit-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .msg {
+    margin-top: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .msg.success { color: var(--green); }
+  .msg.error { color: var(--red); }
+
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark-orange);
+    margin: 22px 0 10px;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 6px;
+  }
+  .print-btn {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--dark-orange);
+    font-weight: 600;
+  }
+  .config-warning {
+    background: #FFF3CD;
+    border: 1px solid #E6C46A;
+    color: #6b5416;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+  }
+  footer {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #a08765;
+    padding: 10px 0 30px;
+  }
+  @media print {
+    .tabs, .form-box, .print-btn, header p { display: none !important; }
+    header { background: #fff !important; color: var(--dark-orange) !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SRI SRI VISHWAKARMA PUJA — 2026</h1>
+  <p>Accounts &amp; Contribution Register</p>
+</header>
+
+<div class="container">
+
+  <div id="configWarning" class="config-warning" style="display:none;">
+    ⚠️ This page isn't connected to a Google Sheet yet. Open <code>index.html</code> and set
+    <code>APPS_SCRIPT_URL</code> at the top of the script to your deployed Apps Script Web App URL.
+  </div>
+
+  <div class="summary">
+    <div class="card collection">
+      <div class="label">Total Collection</div>
+      <div class="value" id="totalDonations">₹0</div>
+    </div>
+    <div class="card expense">
+      <div class="label">Total Expense</div>
+      <div class="value" id="totalExpenses">₹0</div>
+    </div>
+    <div class="card balance">
+      <div class="label">Balance in Hand</div>
+      <div class="value" id="balance">₹0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="view">📒 View Accounts</button>
+    <button class="tab-btn" data-tab="add">➕ Add Entry</button>
+  </div>
+
+  <!-- VIEW PANEL -->
+  <div class="panel active" id="panel-view">
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+    <div class="section-title">Donations / Chanda Collected</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Donor Name</th><th>Address / Locality</th>
+          <th class="amount">Amount</th><th>Collected By</th>
+        </tr>
+      </thead>
+      <tbody id="donationsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+    </table>
+
+    <div class="section-title">Expenses</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Category</th><th>Description</th>
+          <th class="amount">Amount</th><th>Paid To</th><th>Added By</th>
+        </tr>
+      </thead>
+      <tbody id="expensesBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ADD PANEL -->
+  <div class="panel" id="panel-add">
+
+    <div class="form-box">
+      <h3>Committee Password</h3>
+      <div class="form-row">
+        <label for="password">Shared committee password (asked once per visit)</label>
+        <input type="password" id="password" placeholder="Enter shared password">
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-subtab="donation">Add Donation</button>
+      <button class="tab-btn" data-subtab="expense">Add Expense</button>
+    </div>
+
+    <div class="form-box subpanel active" id="sub-donation">
+      <h3>New Donation / Chanda Entry</h3>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="dDate">Date</label>
+          <input type="date" id="dDate">
+        </div>
+        <div class="form-row">
+          <label for="dAmount">Amount (₹)</label>
+          <input type="number" id="dAmount" min="1" placeholder="e.g. 500">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="dName">Donor Name</label>
+        <input type="text" id="dName" placeholder="Donor's full name">
+      </div>
+      <div class="form-row">
+        <label for="dAddress">Address / Locality (optional)</label>
+        <input type="text" id="dAddress" placeholder="Village / area">
+      </div>
+      <div class="form-row">
+        <label for="dCollectedBy">Collected By</label>
+        <input list="committeeNames" id="dCollectedBy" placeholder="Committee member name">
+      </div>
+      <button class="submit-btn" onclick="submitDonation()">Save Donation</button>
+      <div class="msg" id="dMsg"></div>
+    </div>
+
+    <div class="form-box subpanel" id="sub-expense">
+      <h3>New Expense Entry</h3>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="eDate">Date</label>
+          <input type="date" id="eDate">
+        </div>
+        <div class="form-row">
+          <label for="eAmount">Amount (₹)</label>
+          <input type="number" id="eAmount" min="1" placeholder="e.g. 1200">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="eCategory">Category</label>
+        <select id="eCategory">
+          <option value="Puja Samagri">Puja Samagri</option>
+          <option value="Feast">Feast</option>
+          <option value="Pandal & Decoration">Pandal &amp; Decoration</option>
+          <option value="Prasad">Prasad</option>
+          <option value="Printing (Leaflet & Card)">Printing (Leaflet &amp; Card)</option>
+          <option value="Naam Party">Naam Party</option>
+          <option value="Tree Plantation">Tree Plantation</option>
+          <option value="Debate Competition">Debate Competition</option>
+          <option value="Miscellaneous">Miscellaneous</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="eDescription">Description</label>
+        <input type="text" id="eDescription" placeholder="What was this expense for?">
+      </div>
+      <div class="form-row">
+        <label for="ePaidTo">Paid To (optional)</label>
+        <input type="text" id="ePaidTo" placeholder="Shop / person paid">
+      </div>
+      <div class="form-row">
+        <label for="eAddedBy">Added By</label>
+        <input list="committeeNames" id="eAddedBy" placeholder="Committee member name">
+      </div>
+      <button class="submit-btn" onclick="submitExpense()">Save Expense</button>
+      <div class="msg" id="eMsg"></div>
+    </div>
+  </div>
+
+  <datalist id="committeeNames">
+    <option value="Joy Gopal Goswami">
+    <option value="Bitu Saha">
+    <option value="Abdur Rezzak">
+    <option value="Rabindra Das">
+    <option value="Amit Choudhury">
+    <option value="Ashraful Hussain">
+    <option value="Sankar Ojah">
+    <option value="Suchil Nath">
+    <option value="Jamal Ali Sk">
+    <option value="Sahjubin Rahman">
+    <option value="Piran">
+    <option value="Tupai Sarkar">
+    <option value="Uttam Das">
+    <option value="Ranjit Dey">
+    <option value="Khirat Paul">
+    <option value="Dhruba Lochan Das">
+    <option value="Dimbeswar Baishya">
+    <option value="Tapas">
+    <option value="Piran Krishna Nath">
+    <option value="Rizwan">
+    <option value="Nekib">
+    <option value="Mokibur">
+    <option value="Abdulla Zaman">
+    <option value="Zakir Hussain">
+    <option value="Karan Paul">
+    <option value="Jeherul">
+    <option value="Fazlul Hoque">
+    <option value="Jeherul Islam">
+    <option value="Ahsanul Aktar">
+    <option value="Wadud">
+  </datalist>
+
+</div>
+
+<footer>Sri Sri Vishwakarma Puja, 2026 &middot; Accounts maintained by the Organizing Committee</footer>
+
+<script>
+  // ============================================================
+  // SET THIS to your deployed Google Apps Script Web App URL.
+  // (Deploy > New deployment > Web app > "Anyone" access, then
+  // paste the /exec URL here. See README.md for full steps.)
+  // ============================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbhLdpwIMp1lLfckVU7Ku0ieR7CuHBQNN2JRbPlebdUqKNGRnqEjOKHh5DbBJRuW-x/exec";
+
+  const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+
+  function showConfigWarningIfNeeded() {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
+      document.getElementById("configWarning").style.display = "block";
+      return true;
+    }
+    return false;
+  }
+
+  async function loadData() {
+    if (showConfigWarningIfNeeded()) return;
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const data = await res.json();
+      document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
+      document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
+      document.getElementById("balance").textContent = fmt(data.balance);
+      renderDonations(data.donations || []);
+      renderExpenses(data.expenses || []);
+    } catch (err) {
+      document.getElementById("donationsBody").innerHTML =
+        '<tr class="empty-row"><td colspan="5">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
+      document.getElementById("expensesBody").innerHTML =
+        '<tr class="empty-row"><td colspan="6">Could not load data.</td></tr>';
+    }
+  }
+
+  function renderDonations(rows) {
+    const body = document.getElementById("donationsBody");
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="5">No donations recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r["Date"] || ""}</td>
+        <td>${r["Donor Name"] || ""}</td>
+        <td>${r["Address/Locality"] || ""}</td>
+        <td class="amount">${fmt(r["Amount"])}</td>
+        <td>${r["Collected By"] || ""}</td>
+      </tr>`).join("");
+  }
+
+  function renderExpenses(rows) {
+    const body = document.getElementById("expensesBody");
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="6">No expenses recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r["Date"] || ""}</td>
+        <td>${r["Category"] || ""}</td>
+        <td>${r["Description"] || ""}</td>
+        <td class="amount">${fmt(r["Amount"])}</td>
+        <td>${r["Paid To"] || ""}</td>
+        <td>${r["Added By"] || ""}</td>
+      </tr>`).join("");
+  }
+
+  async function postEntry(payload, msgEl) {
+    msgEl.textContent = "";
+    msgEl.className = "msg";
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        msgEl.textContent = "Saved successfully.";
+        msgEl.classList.add("success");
+        return true;
+      } else {
+        msgEl.textContent = data.error || "Something went wrong.";
+        msgEl.classList.add("error");
+        return false;
+      }
+    } catch (err) {
+      msgEl.textContent = "Network error — could not reach the sheet.";
+      msgEl.classList.add("error");
+      return false;
+    }
+  }
+
+  async function submitDonation() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("password").value.trim();
+    const date = document.getElementById("dDate").value;
+    const amount = document.getElementById("dAmount").value;
+    const donorName = document.getElementById("dName").value.trim();
+    const address = document.getElementById("dAddress").value.trim();
+    const collectedBy = document.getElementById("dCollectedBy").value.trim();
+    const msgEl = document.getElementById("dMsg");
+
+    if (!password) { msgEl.textContent = "Enter the committee password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount || !donorName || !collectedBy) {
+      msgEl.textContent = "Please fill date, amount, donor name and collected-by.";
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const ok = await postEntry({
+      action: "addDonation", password, date, amount, donorName, address, collectedBy,
+    }, msgEl);
+
+    if (ok) {
+      sessionStorage.setItem("puja_password", password);
+      document.getElementById("dAmount").value = "";
+      document.getElementById("dName").value = "";
+      document.getElementById("dAddress").value = "";
+      loadData();
+    }
+  }
+
+  async function submitExpense() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("password").value.trim();
+    const date = document.getElementById("eDate").value;
+    const amount = document.getElementById("eAmount").value;
+    const category = document.getElementById("eCategory").value;
+    const description = document.getElementById("eDescription").value.trim();
+    const paidTo = document.getElementById("ePaidTo").value.trim();
+    const addedBy = document.getElementById("eAddedBy").value.trim();
+    const msgEl = document.getElementById("eMsg");
+
+    if (!password) { msgEl.textContent = "Enter the committee password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount || !category || !addedBy) {
+      msgEl.textContent = "Please fill date, amount, category and added-by.";
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const ok = await postEntry({
+      action: "addExpense", password, date, amount, category, description, paidTo, addedBy,
+    }, msgEl);
+
+    if (ok) {
+      sessionStorage.setItem("puja_password", password);
+      document.getElementById("eAmount").value = "";
+      document.getElementById("eDescription").value = "";
+      document.getElementById("ePaidTo").value = "";
+      loadData();
+    }
+  }
+
+  // ---- tab handling ----
+  document.querySelectorAll(".tabs").forEach(tabGroup => {
+    tabGroup.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const isMain = btn.hasAttribute("data-tab");
+        tabGroup.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (isMain) {
+          document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+          document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        } else {
+          document.querySelectorAll(".subpanel").forEach(p => p.classList.remove("active"));
+          document.getElementById("sub-" + btn.dataset.subtab).classList.add("active");
+        }
+      });
+    });
+  });
+
+  // restore remembered password for convenience (session only)
+  const remembered = sessionStorage.getItem("puja_password");
+  if (remembered) document.getElementById("password").value = remembered;
+
+  // default dates to today
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById("dDate").value = today;
+  document.getElementById("eDate").value = today;
+
+  loadData();
+</script>
+
+</body>
+</html>
