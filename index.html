@@ -267,10 +267,10 @@
       <thead>
         <tr>
           <th>Date</th><th>Donor Name</th><th>Address / Locality</th>
-          <th class="amount">Amount</th><th>Collected By</th>
+          <th class="amount">Amount</th><th>Mode</th><th>Collected By</th>
         </tr>
       </thead>
-      <tbody id="donationsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+      <tbody id="donationsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
     </table>
 
     <div class="section-title">Expenses</div>
@@ -278,10 +278,10 @@
       <thead>
         <tr>
           <th>Date</th><th>Category</th><th>Description</th>
-          <th class="amount">Amount</th><th>Paid To</th><th>Added By</th>
+          <th class="amount">Amount</th><th>Mode</th><th>Paid To</th><th>Added By</th>
         </tr>
       </thead>
-      <tbody id="expensesBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      <tbody id="expensesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
     </table>
   </div>
 
@@ -320,6 +320,13 @@
       <div class="form-row">
         <label for="dAddress">Address / Locality (optional)</label>
         <input type="text" id="dAddress" placeholder="Village / area">
+      </div>
+      <div class="form-row">
+        <label for="dMode">Payment Mode</label>
+        <select id="dMode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+        </select>
       </div>
       <div class="form-row">
         <label for="dCollectedBy">Collected By</label>
@@ -362,6 +369,13 @@
       <div class="form-row">
         <label for="ePaidTo">Paid To (optional)</label>
         <input type="text" id="ePaidTo" placeholder="Shop / person paid">
+      </div>
+      <div class="form-row">
+        <label for="eMode">Payment Mode</label>
+        <select id="eMode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+        </select>
       </div>
       <div class="form-row">
         <label for="eAddedBy">Added By</label>
@@ -415,7 +429,7 @@
   // (Deploy > New deployment > Web app > "Anyone" access, then
   // paste the /exec URL here. See README.md for full steps.)
   // ============================================================
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbhLdpwIMp1lLfckVU7Ku0ieR7CuHBQNN2JRbPlebdUqKNGRnqEjOKHh5DbBJRuW-x/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUXghb_NQC-ZqxF-ckMrVt4CWl0WNBSEUob3CG-Vvavvq278Ryt-RwXA7W9MF664Pk/exec";
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
@@ -448,7 +462,7 @@
   function renderDonations(rows) {
     const body = document.getElementById("donationsBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="5">No donations recorded yet.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="6">No donations recorded yet.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
@@ -457,6 +471,7 @@
         <td>${r["Donor Name"] || ""}</td>
         <td>${r["Address/Locality"] || ""}</td>
         <td class="amount">${fmt(r["Amount"])}</td>
+        <td>${r["Payment Mode"] || ""}</td>
         <td>${r["Collected By"] || ""}</td>
       </tr>`).join("");
   }
@@ -464,7 +479,7 @@
   function renderExpenses(rows) {
     const body = document.getElementById("expensesBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="6">No expenses recorded yet.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">No expenses recorded yet.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
@@ -473,6 +488,7 @@
         <td>${r["Category"] || ""}</td>
         <td>${r["Description"] || ""}</td>
         <td class="amount">${fmt(r["Amount"])}</td>
+        <td>${r["Payment Mode"] || ""}</td>
         <td>${r["Paid To"] || ""}</td>
         <td>${r["Added By"] || ""}</td>
       </tr>`).join("");
@@ -511,6 +527,7 @@
     const amount = document.getElementById("dAmount").value;
     const donorName = document.getElementById("dName").value.trim();
     const address = document.getElementById("dAddress").value.trim();
+    const paymentMode = document.getElementById("dMode").value;
     const collectedBy = document.getElementById("dCollectedBy").value.trim();
     const msgEl = document.getElementById("dMsg");
 
@@ -522,7 +539,7 @@
     }
 
     const ok = await postEntry({
-      action: "addDonation", password, date, amount, donorName, address, collectedBy,
+      action: "addDonation", password, date, amount, donorName, address, paymentMode, collectedBy,
     }, msgEl);
 
     if (ok) {
@@ -542,6 +559,7 @@
     const category = document.getElementById("eCategory").value;
     const description = document.getElementById("eDescription").value.trim();
     const paidTo = document.getElementById("ePaidTo").value.trim();
+    const paymentMode = document.getElementById("eMode").value;
     const addedBy = document.getElementById("eAddedBy").value.trim();
     const msgEl = document.getElementById("eMsg");
 
@@ -553,7 +571,7 @@
     }
 
     const ok = await postEntry({
-      action: "addExpense", password, date, amount, category, description, paidTo, addedBy,
+      action: "addExpense", password, date, amount, category, description, paidTo, paymentMode, addedBy,
     }, msgEl);
 
     if (ok) {
