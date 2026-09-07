@@ -13,7 +13,9 @@
     --text-dark: #3A2312;
     --green: #1E7B34;
     --red: #B3261E;
+    --blue: #1E6FA6;
     --border: #E8C9A0;
+    --whatsapp: #25D366;
   }
   * { box-sizing: border-box; }
   body {
@@ -47,7 +49,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
-    margin: -20px 0 24px;
+    margin: -20px 0 16px;
   }
   .card {
     background: #fff;
@@ -71,8 +73,57 @@
   .card.collection .value { color: var(--green); }
   .card.expense .value { color: var(--red); }
   .card.balance .value { color: var(--dark-orange); }
-  .card.cash .value { color: var(--dark-orange); }
-  .card.upi .value { color: #1E6FA6; }
+  .card.upi .value { color: var(--blue); }
+
+  .progress-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .progress-box .ptitle {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--dark-orange);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    background: #F1E2CC;
+    border-radius: 20px;
+    height: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, var(--gold), var(--orange));
+    height: 100%;
+    border-radius: 20px 0 0 20px;
+    transition: width 0.4s ease;
+  }
+  .progress-note {
+    font-size: 0.78rem;
+    color: #8a6a4d;
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  .whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--whatsapp);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
 
   .tabs {
     display: flex;
@@ -102,6 +153,17 @@
   .subpanel { display: none; }
   .subpanel.active { display: block; }
 
+  .search-row {
+    margin-bottom: 8px;
+  }
+  .search-row input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+  }
+
   table {
     width: 100%;
     min-width: 480px;
@@ -129,7 +191,11 @@
     background: var(--orange);
     color: #fff;
     font-weight: 600;
+    white-space: nowrap;
   }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { background: var(--dark-orange); }
+  th .arrow { font-size: 0.7rem; opacity: 0.8; margin-left: 3px; }
   tr:last-child td { border-bottom: none; }
   td.amount, th.amount { text-align: right; white-space: nowrap; }
   .empty-row td {
@@ -138,6 +204,35 @@
     font-style: italic;
     padding: 18px;
   }
+
+  .cat-totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .cat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .cat-card .cname {
+    font-size: 0.76rem;
+    color: #8a6a4d;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .cat-card .cvalue {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark-orange);
+    margin-top: 3px;
+  }
+
+  .person-table th, .person-table td { text-align: center; }
+  .person-table td:first-child, .person-table th:first-child { text-align: left; }
 
   .form-box {
     background: #fff;
@@ -172,6 +267,13 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
+  .login-status {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .login-status.ok { color: var(--green); }
+  .login-status.bad { color: var(--red); }
   button.submit-btn {
     width: 100%;
     padding: 11px;
@@ -229,7 +331,7 @@
     padding: 10px 0 30px;
   }
   @media print {
-    .tabs, .form-box, .print-btn, header p { display: none !important; }
+    .tabs, .form-box, .print-btn, .whatsapp-btn, .search-row, header p { display: none !important; }
     header { background: #fff !important; color: var(--dark-orange) !important; }
   }
   @media (max-width: 480px) {
@@ -281,6 +383,40 @@
     </div>
   </div>
 
+  <div class="progress-box">
+    <div class="ptitle">
+      <span>Collection Target</span>
+      <span id="progressText">₹0 of ₹2,50,000</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%;"></div>
+    </div>
+    <div class="progress-note" id="progressNote"></div>
+  </div>
+
+  <div class="section-title">Treasurer-wise Cash Position</div>
+  <div class="table-wrap">
+    <table class="person-table">
+      <thead>
+        <tr><th>Name</th><th>Cash in Hand</th><th>Cash in Bank (UPI)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Amit Choudhury</td>
+          <td id="amitCash">₹0</td>
+          <td id="amitUpi">₹0</td>
+        </tr>
+        <tr>
+          <td>Abhigyan Talukdar</td>
+          <td id="abhigyanCash">₹0</td>
+          <td id="abhigyanUpi">₹0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="whatsapp-btn" onclick="shareToWhatsApp()">📲 Share Summary on WhatsApp</button>
+
   <div class="tabs">
     <button class="tab-btn active" data-tab="view">📒 View Accounts</button>
     <button class="tab-btn" data-tab="add">➕ Add Entry</button>
@@ -291,26 +427,28 @@
     <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
 
     <div class="section-title">Donations / Chanda Collected</div>
+    <div class="cat-totals" id="donationCatTotals"></div>
+    <div class="search-row">
+      <input type="text" id="donationSearch" placeholder="Search donations (name, category, collector)…">
+    </div>
     <div class="table-wrap">
     <table>
       <thead>
-        <tr>
-          <th>Date</th><th>Donor Name</th><th>Address / Locality</th>
-          <th class="amount">Amount</th><th>Mode</th><th>Collected By</th>
-        </tr>
+        <tr id="donationHeaderRow"></tr>
       </thead>
       <tbody id="donationsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
     </table>
     </div>
 
     <div class="section-title">Expenses</div>
+    <div class="cat-totals" id="expenseCatTotals"></div>
+    <div class="search-row">
+      <input type="text" id="expenseSearch" placeholder="Search expenses (category, description, paid to)…">
+    </div>
     <div class="table-wrap">
     <table>
       <thead>
-        <tr>
-          <th>Date</th><th>Category</th><th>Description</th>
-          <th class="amount">Amount</th><th>Mode</th><th>Paid To</th><th>Added By</th>
-        </tr>
+        <tr id="expenseHeaderRow"></tr>
       </thead>
       <tbody id="expensesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
     </table>
@@ -321,11 +459,12 @@
   <div class="panel" id="panel-add">
 
     <div class="form-box">
-      <h3>Committee Password</h3>
+      <h3>Committee Login</h3>
       <div class="form-row">
-        <label for="password">Shared committee password (asked once per visit)</label>
-        <input type="password" id="password" placeholder="Enter shared password">
+        <label for="password">Your password</label>
+        <input type="password" id="password" placeholder="Enter your password">
       </div>
+      <div class="login-status" id="loginStatus"></div>
     </div>
 
     <div class="tabs">
@@ -350,8 +489,13 @@
         <input type="text" id="dName" placeholder="Donor's full name">
       </div>
       <div class="form-row">
-        <label for="dAddress">Address / Locality (optional)</label>
-        <input type="text" id="dAddress" placeholder="Village / area">
+        <label for="dCategory">Category</label>
+        <select id="dCategory">
+          <option value="Staff">Staff</option>
+          <option value="Vendor">Vendor</option>
+          <option value="Contractor">Contractor</option>
+          <option value="Others">Others</option>
+        </select>
       </div>
       <div class="form-row">
         <label for="dMode">Payment Mode</label>
@@ -360,11 +504,7 @@
           <option value="UPI">UPI</option>
         </select>
       </div>
-      <div class="form-row">
-        <label for="dCollectedBy">Collected By</label>
-        <input list="committeeNames" id="dCollectedBy" placeholder="Committee member name">
-      </div>
-      <button class="submit-btn" onclick="submitDonation()">Save Donation</button>
+      <button class="submit-btn" id="dSubmitBtn" onclick="submitDonation()">Save Donation</button>
       <div class="msg" id="dMsg"></div>
     </div>
 
@@ -409,25 +549,10 @@
           <option value="UPI">UPI</option>
         </select>
       </div>
-      <div class="form-row">
-        <label for="eAddedBy">Added By</label>
-        <input list="committeeNames" id="eAddedBy" placeholder="Committee member name">
-      </div>
-      <button class="submit-btn" onclick="submitExpense()">Save Expense</button>
+      <button class="submit-btn" id="eSubmitBtn" onclick="submitExpense()">Save Expense</button>
       <div class="msg" id="eMsg"></div>
     </div>
   </div>
-
-  <datalist id="committeeNames">
-    <option value="Joy Gopal Goswami">
-    <option value="Bitu Saha">
-    <option value="Abdur Rezzak">
-    <option value="Abhigyan Talukdar">
-    <option value="Amit Choudhury">
-    <option value="Ashraful Hussain">
-    <option value="Sankar Ojah">
-    <option value="Sahjubin Rahman">
-  </datalist>
 
 </div>
 
@@ -436,10 +561,36 @@
 <script>
   // ============================================================
   // SET THIS to your deployed Google Apps Script Web App URL.
-  // (Deploy > New deployment > Web app > "Anyone" access, then
-  // paste the /exec URL here. See README.md for full steps.)
   // ============================================================
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUXghb_NQC-ZqxF-ckMrVt4CWl0WNBSEUob3CG-Vvavvq278Ryt-RwXA7W9MF664Pk/exec";
+
+  const TARGET_AMOUNT = 250000;
+  const PERSON_NAMES = ["Amit Choudhury", "Abhigyan Talukdar"];
+
+  const DONATION_COLUMNS = [
+    { key: "Date", label: "Date" },
+    { key: "Donor Name", label: "Donor Name" },
+    { key: "Donor Category", label: "Category" },
+    { key: "Amount", label: "Amount", amount: true },
+    { key: "Payment Mode", label: "Mode" },
+    { key: "Collected By", label: "Collected By" },
+  ];
+  const EXPENSE_COLUMNS = [
+    { key: "Date", label: "Date" },
+    { key: "Category", label: "Category" },
+    { key: "Description", label: "Description" },
+    { key: "Amount", label: "Amount", amount: true },
+    { key: "Payment Mode", label: "Mode" },
+    { key: "Paid To", label: "Paid To" },
+    { key: "Added By", label: "Added By" },
+  ];
+
+  let donationsData = [];
+  let expensesData = [];
+  let donationSort = { key: "Date", dir: "desc" };
+  let expenseSort = { key: "Date", dir: "desc" };
+  let donationSearchText = "";
+  let expenseSearchText = "";
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
@@ -447,6 +598,22 @@
     return rows
       .filter(r => (r["Payment Mode"] || "Cash") === mode)
       .reduce((sum, r) => sum + (Number(r["Amount"]) || 0), 0);
+  }
+
+  function sumByPerson(donRows, expRows, name, mode) {
+    const d = donRows.filter(r => r["Collected By"] === name && (r["Payment Mode"] || "Cash") === mode)
+                     .reduce((s, r) => s + (Number(r["Amount"]) || 0), 0);
+    const e = expRows.filter(r => r["Added By"] === name && (r["Payment Mode"] || "Cash") === mode)
+                     .reduce((s, r) => s + (Number(r["Amount"]) || 0), 0);
+    return d - e;
+  }
+
+  function parseDateStr(s) {
+    if (!s) return 0;
+    const parts = String(s).split("-");
+    if (parts.length !== 3) return 0;
+    // dd-MM-yyyy
+    return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
   }
 
   function showConfigWarningIfNeeded() {
@@ -457,50 +624,152 @@
     return false;
   }
 
+  // ---------- data load ----------
+
   async function loadData() {
     if (showConfigWarningIfNeeded()) return;
     try {
       const res = await fetch(APPS_SCRIPT_URL);
       const data = await res.json();
+      donationsData = data.donations || [];
+      expensesData = data.expenses || [];
+
       document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
       document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
 
-      const cashInHand = sumByMode(data.donations || [], "Cash") - sumByMode(data.expenses || [], "Cash");
-      const cashInBank = sumByMode(data.donations || [], "UPI") - sumByMode(data.expenses || [], "UPI");
+      const cashInHand = sumByMode(donationsData, "Cash") - sumByMode(expensesData, "Cash");
+      const cashInBank = sumByMode(donationsData, "UPI") - sumByMode(expensesData, "UPI");
       document.getElementById("cashInHand").textContent = fmt(cashInHand);
       document.getElementById("cashInBank").textContent = fmt(cashInBank);
 
-      renderDonations(data.donations || []);
-      renderExpenses(data.expenses || []);
+      document.getElementById("amitCash").textContent = fmt(sumByPerson(donationsData, expensesData, "Amit Choudhury", "Cash"));
+      document.getElementById("amitUpi").textContent = fmt(sumByPerson(donationsData, expensesData, "Amit Choudhury", "UPI"));
+      document.getElementById("abhigyanCash").textContent = fmt(sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "Cash"));
+      document.getElementById("abhigyanUpi").textContent = fmt(sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "UPI"));
+
+      updateProgress(data.totalDonations || 0);
+      renderCatTotals(donationsData, "Donor Category", "donationCatTotals");
+      renderCatTotals(expensesData, "Category", "expenseCatTotals");
+
+      renderTableHeader("donationHeaderRow", DONATION_COLUMNS, donationSort, onSortDonation);
+      renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
+      renderDonationsTable();
+      renderExpensesTable();
     } catch (err) {
       document.getElementById("donationsBody").innerHTML =
-        '<tr class="empty-row"><td colspan="5">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
+        '<tr class="empty-row"><td colspan="6">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
       document.getElementById("expensesBody").innerHTML =
-        '<tr class="empty-row"><td colspan="6">Could not load data.</td></tr>';
+        '<tr class="empty-row"><td colspan="7">Could not load data.</td></tr>';
     }
   }
 
-  function renderDonations(rows) {
+  function updateProgress(total) {
+    const pct = Math.min(100, Math.round((total / TARGET_AMOUNT) * 100));
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("progressText").textContent = fmt(total) + " of " + fmt(TARGET_AMOUNT);
+    const note = document.getElementById("progressNote");
+    if (total >= TARGET_AMOUNT) {
+      note.textContent = "Target achieved! " + fmt(total - TARGET_AMOUNT) + " above target.";
+    } else {
+      note.textContent = pct + "% reached — " + fmt(TARGET_AMOUNT - total) + " remaining.";
+    }
+  }
+
+  function renderCatTotals(rows, key, containerId) {
+    const map = {};
+    rows.forEach(r => {
+      const cat = r[key] || "Uncategorized";
+      map[cat] = (map[cat] || 0) + (Number(r["Amount"]) || 0);
+    });
+    const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    const container = document.getElementById(containerId);
+    if (!entries.length) {
+      container.innerHTML = '<div class="cat-card"><div class="cname">No data yet</div><div class="cvalue">₹0</div></div>';
+      return;
+    }
+    container.innerHTML = entries.map(([cat, amt]) => `
+      <div class="cat-card">
+        <div class="cname">${cat}</div>
+        <div class="cvalue">${fmt(amt)}</div>
+      </div>`).join("");
+  }
+
+  // ---------- sorting / search / table rendering ----------
+
+  function renderTableHeader(rowId, columns, sortState, clickHandler) {
+    const row = document.getElementById(rowId);
+    row.innerHTML = columns.map(col => {
+      const arrow = sortState.key === col.key ? (sortState.dir === "asc" ? "▲" : "▼") : "";
+      const cls = "sortable" + (col.amount ? " amount" : "");
+      return `<th class="${cls}" data-key="${col.key}">${col.label}<span class="arrow">${arrow}</span></th>`;
+    }).join("");
+    Array.from(row.children).forEach((th, i) => {
+      th.addEventListener("click", () => clickHandler(columns[i].key));
+    });
+  }
+
+  function onSortDonation(key) {
+    if (donationSort.key === key) donationSort.dir = donationSort.dir === "asc" ? "desc" : "asc";
+    else { donationSort.key = key; donationSort.dir = "asc"; }
+    renderTableHeader("donationHeaderRow", DONATION_COLUMNS, donationSort, onSortDonation);
+    renderDonationsTable();
+  }
+
+  function onSortExpense(key) {
+    if (expenseSort.key === key) expenseSort.dir = expenseSort.dir === "asc" ? "desc" : "asc";
+    else { expenseSort.key = key; expenseSort.dir = "asc"; }
+    renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
+    renderExpensesTable();
+  }
+
+  function applySearchSort(data, searchText, sortState) {
+    let rows = data;
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      rows = rows.filter(r => Object.values(r).some(v => String(v || "").toLowerCase().includes(q)));
+    }
+    if (sortState.key) {
+      rows = [...rows].sort((a, b) => {
+        let av, bv;
+        if (sortState.key === "Amount") {
+          av = Number(a["Amount"]) || 0; bv = Number(b["Amount"]) || 0;
+        } else if (sortState.key === "Date") {
+          av = parseDateStr(a["Date"]); bv = parseDateStr(b["Date"]);
+        } else {
+          av = String(a[sortState.key] || "").toLowerCase();
+          bv = String(b[sortState.key] || "").toLowerCase();
+        }
+        if (av < bv) return sortState.dir === "asc" ? -1 : 1;
+        if (av > bv) return sortState.dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return rows;
+  }
+
+  function renderDonationsTable() {
+    const rows = applySearchSort(donationsData, donationSearchText, donationSort);
     const body = document.getElementById("donationsBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="6">No donations recorded yet.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="6">No matching donations.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
       <tr>
         <td>${r["Date"] || ""}</td>
         <td>${r["Donor Name"] || ""}</td>
-        <td>${r["Address/Locality"] || ""}</td>
+        <td>${r["Donor Category"] || ""}</td>
         <td class="amount">${fmt(r["Amount"])}</td>
         <td>${r["Payment Mode"] || ""}</td>
         <td>${r["Collected By"] || ""}</td>
       </tr>`).join("");
   }
 
-  function renderExpenses(rows) {
+  function renderExpensesTable() {
+    const rows = applySearchSort(expensesData, expenseSearchText, expenseSort);
     const body = document.getElementById("expensesBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="7">No expenses recorded yet.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">No matching expenses.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
@@ -515,9 +784,56 @@
       </tr>`).join("");
   }
 
-  async function postEntry(payload, msgEl) {
+  document.getElementById("donationSearch").addEventListener("input", (e) => {
+    donationSearchText = e.target.value;
+    renderDonationsTable();
+  });
+  document.getElementById("expenseSearch").addEventListener("input", (e) => {
+    expenseSearchText = e.target.value;
+    renderExpensesTable();
+  });
+
+  // ---------- login ----------
+
+  let loginCheckTimer = null;
+  document.getElementById("password").addEventListener("input", (e) => {
+    const statusEl = document.getElementById("loginStatus");
+    const pwd = e.target.value.trim();
+    clearTimeout(loginCheckTimer);
+    if (!pwd) { statusEl.textContent = ""; statusEl.className = "login-status"; return; }
+    loginCheckTimer = setTimeout(() => checkLogin(pwd), 400);
+  });
+
+  async function checkLogin(pwd) {
+    const statusEl = document.getElementById("loginStatus");
+    if (showConfigWarningIfNeeded()) return;
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "checkLogin", password: pwd }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        statusEl.textContent = "Logged in as: " + data.name;
+        statusEl.className = "login-status ok";
+      } else {
+        statusEl.textContent = "Password not recognized.";
+        statusEl.className = "login-status bad";
+      }
+    } catch (err) {
+      statusEl.textContent = "Could not verify password (network error).";
+      statusEl.className = "login-status bad";
+    }
+  }
+
+  // ---------- submit ----------
+
+  async function postEntry(payload, msgEl, btnEl, savingLabel, defaultLabel) {
     msgEl.textContent = "";
     msgEl.className = "msg";
+    btnEl.disabled = true;
+    btnEl.textContent = savingLabel;
     try {
       const res = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
@@ -526,7 +842,7 @@
       });
       const data = await res.json();
       if (data.success) {
-        msgEl.textContent = "Saved successfully.";
+        msgEl.textContent = "Saved successfully as " + data.name + ".";
         msgEl.classList.add("success");
         return true;
       } else {
@@ -538,6 +854,9 @@
       msgEl.textContent = "Network error — could not reach the sheet.";
       msgEl.classList.add("error");
       return false;
+    } finally {
+      btnEl.disabled = false;
+      btnEl.textContent = defaultLabel;
     }
   }
 
@@ -547,27 +866,25 @@
     const date = document.getElementById("dDate").value;
     const amount = document.getElementById("dAmount").value;
     const donorName = document.getElementById("dName").value.trim();
-    const address = document.getElementById("dAddress").value.trim();
+    const donorCategory = document.getElementById("dCategory").value;
     const paymentMode = document.getElementById("dMode").value;
-    const collectedBy = document.getElementById("dCollectedBy").value.trim();
     const msgEl = document.getElementById("dMsg");
+    const btnEl = document.getElementById("dSubmitBtn");
 
-    if (!password) { msgEl.textContent = "Enter the committee password."; msgEl.className = "msg error"; return; }
-    if (!date || !amount || !donorName || !collectedBy) {
-      msgEl.textContent = "Please fill date, amount, donor name and collected-by.";
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount || !donorName) {
+      msgEl.textContent = "Please fill date, amount and donor name.";
       msgEl.className = "msg error";
       return;
     }
 
     const ok = await postEntry({
-      action: "addDonation", password, date, amount, donorName, address, paymentMode, collectedBy,
-    }, msgEl);
+      action: "addDonation", password, date, amount, donorName, donorCategory, paymentMode,
+    }, msgEl, btnEl, "Saving…", "Save Donation");
 
     if (ok) {
-      sessionStorage.setItem("puja_password", password);
       document.getElementById("dAmount").value = "";
       document.getElementById("dName").value = "";
-      document.getElementById("dAddress").value = "";
       loadData();
     }
   }
@@ -581,27 +898,44 @@
     const description = document.getElementById("eDescription").value.trim();
     const paidTo = document.getElementById("ePaidTo").value.trim();
     const paymentMode = document.getElementById("eMode").value;
-    const addedBy = document.getElementById("eAddedBy").value.trim();
     const msgEl = document.getElementById("eMsg");
+    const btnEl = document.getElementById("eSubmitBtn");
 
-    if (!password) { msgEl.textContent = "Enter the committee password."; msgEl.className = "msg error"; return; }
-    if (!date || !amount || !category || !addedBy) {
-      msgEl.textContent = "Please fill date, amount, category and added-by.";
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount || !category) {
+      msgEl.textContent = "Please fill date, amount and category.";
       msgEl.className = "msg error";
       return;
     }
 
     const ok = await postEntry({
-      action: "addExpense", password, date, amount, category, description, paidTo, paymentMode, addedBy,
-    }, msgEl);
+      action: "addExpense", password, date, amount, category, description, paidTo, paymentMode,
+    }, msgEl, btnEl, "Saving…", "Save Expense");
 
     if (ok) {
-      sessionStorage.setItem("puja_password", password);
       document.getElementById("eAmount").value = "";
       document.getElementById("eDescription").value = "";
       document.getElementById("ePaidTo").value = "";
       loadData();
     }
+  }
+
+  // ---------- WhatsApp share ----------
+
+  function shareToWhatsApp() {
+    const total = document.getElementById("totalDonations").textContent;
+    const exp = document.getElementById("totalExpenses").textContent;
+    const cash = document.getElementById("cashInHand").textContent;
+    const upi = document.getElementById("cashInBank").textContent;
+    const progress = document.getElementById("progressText").textContent;
+    const text =
+      "*Sri Sri Vishwakarma Puja 2026 — Accounts Update*\n\n" +
+      "Total Collection: " + total + "\n" +
+      "Total Expense: " + exp + "\n" +
+      "Cash in Hand: " + cash + "\n" +
+      "Cash in Bank (UPI): " + upi + "\n" +
+      "Progress: " + progress;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
   }
 
   // ---- tab handling ----
@@ -621,10 +955,6 @@
       });
     });
   });
-
-  // restore remembered password for convenience (session only)
-  const remembered = sessionStorage.getItem("puja_password");
-  if (remembered) document.getElementById("password").value = remembered;
 
   // default dates to today
   const today = new Date().toISOString().slice(0, 10);
