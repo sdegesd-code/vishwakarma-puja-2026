@@ -453,6 +453,19 @@
       <tbody id="expensesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
     </table>
     </div>
+
+    <div class="section-title">Fund Transfers &amp; Conversions</div>
+    <div class="search-row">
+      <input type="text" id="fundSearch" placeholder="Search fund movements…">
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr id="fundHeaderRow"></tr>
+      </thead>
+      <tbody id="fundsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+    </table>
+    </div>
   </div>
 
   <!-- ADD PANEL -->
@@ -470,6 +483,8 @@
     <div class="tabs">
       <button class="tab-btn active" data-subtab="donation">Add Donation</button>
       <button class="tab-btn" data-subtab="expense">Add Expense</button>
+      <button class="tab-btn" data-subtab="transfer">Transfer</button>
+      <button class="tab-btn" data-subtab="convert">Convert</button>
     </div>
 
     <div class="form-box subpanel active" id="sub-donation">
@@ -555,6 +570,92 @@
       <button class="submit-btn" id="eSubmitBtn" onclick="submitExpense()">Save Expense</button>
       <div class="msg" id="eMsg"></div>
     </div>
+
+    <div class="form-box subpanel" id="sub-transfer">
+      <h3>Fund Transfer (between Amit &amp; Abhigyan)</h3>
+      <p style="font-size:0.82rem; color:#8a6a4d; margin-top:-6px;">
+        Use this when one of you physically hands cash/UPI to the other. It does
+        <strong>not</strong> change the overall totals — only whose balance it sits under.
+      </p>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="tDate">Date</label>
+          <input type="date" id="tDate">
+        </div>
+        <div class="form-row">
+          <label for="tAmount">Amount (₹)</label>
+          <input type="number" id="tAmount" min="1" placeholder="e.g. 2000">
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="tFrom">From</label>
+          <select id="tFrom">
+            <option value="Amit Choudhury">Amit Choudhury</option>
+            <option value="Abhigyan Talukdar">Abhigyan Talukdar</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="tTo">To</label>
+          <select id="tTo">
+            <option value="Abhigyan Talukdar">Abhigyan Talukdar</option>
+            <option value="Amit Choudhury">Amit Choudhury</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="tMode">Mode</label>
+        <select id="tMode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="tNote">Note (optional)</label>
+        <input type="text" id="tNote" placeholder="e.g. handed over at pandal">
+      </div>
+      <button class="submit-btn" id="tSubmitBtn" onclick="submitTransfer()">Save Transfer</button>
+      <div class="msg" id="tMsg"></div>
+    </div>
+
+    <div class="form-box subpanel" id="sub-convert">
+      <h3>Cash ⇄ Bank (UPI) Conversion</h3>
+      <p style="font-size:0.82rem; color:#8a6a4d; margin-top:-6px;">
+        Use this when you withdraw UPI money as physical cash, or deposit cash into
+        the account. This adjusts the overall Cash/UPI split — original donation and
+        expense records are never changed.
+      </p>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="cDate">Date</label>
+          <input type="date" id="cDate">
+        </div>
+        <div class="form-row">
+          <label for="cAmount">Amount (₹)</label>
+          <input type="number" id="cAmount" min="1" placeholder="e.g. 5000">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="cPerson">Person</label>
+        <select id="cPerson">
+          <option value="Amit Choudhury">Amit Choudhury</option>
+          <option value="Abhigyan Talukdar">Abhigyan Talukdar</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="cDirection">Direction</label>
+        <select id="cDirection">
+          <option value="UPI-Cash">Bank (UPI) → Cash (withdrawal)</option>
+          <option value="Cash-UPI">Cash → Bank/UPI (deposit)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="cNote">Note (optional)</label>
+        <input type="text" id="cNote" placeholder="e.g. ATM withdrawal for feast shopping">
+      </div>
+      <button class="submit-btn" id="cSubmitBtn" onclick="submitConversion()">Save Conversion</button>
+      <div class="msg" id="cMsg"></div>
+    </div>
   </div>
 
 </div>
@@ -587,13 +688,24 @@
     { key: "Paid To", label: "Paid To" },
     { key: "Added By", label: "Added By" },
   ];
+  const FUND_COLUMNS = [
+    { key: "Date", label: "Date" },
+    { key: "Move Type", label: "Type" },
+    { key: "From", label: "From" },
+    { key: "To", label: "To" },
+    { key: "Amount", label: "Amount", amount: true },
+    { key: "Note", label: "Note" },
+  ];
 
   let donationsData = [];
   let expensesData = [];
+  let fundsData = [];
   let donationSort = { key: "Date", dir: "desc" };
   let expenseSort = { key: "Date", dir: "desc" };
+  let fundSort = { key: "Date", dir: "desc" };
   let donationSearchText = "";
   let expenseSearchText = "";
+  let fundSearchText = "";
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
 
@@ -609,6 +721,28 @@
     const e = expRows.filter(r => r["Added By"] === name && (r["Payment Mode"] || "Cash") === mode)
                      .reduce((s, r) => s + (Number(r["Amount"]) || 0), 0);
     return d - e;
+  }
+
+  // Net effect of transfers/conversions on one person's balance in one mode.
+  function fundEffectForPerson(fundRows, person, mode) {
+    let effect = 0;
+    fundRows.forEach(r => {
+      if (r["From Person"] === person && r["From Mode"] === mode) effect -= Number(r["Amount"]) || 0;
+      if (r["To Person"] === person && r["To Mode"] === mode) effect += Number(r["Amount"]) || 0;
+    });
+    return effect;
+  }
+
+  // Net effect of all fund movements on the overall pool of one mode.
+  // Transfers (same mode both sides) cancel out to zero here, as intended.
+  // Conversions (different mode each side) shift the overall Cash/UPI split.
+  function fundEffectOverall(fundRows, mode) {
+    let effect = 0;
+    fundRows.forEach(r => {
+      if (r["To Mode"] === mode) effect += Number(r["Amount"]) || 0;
+      if (r["From Mode"] === mode) effect -= Number(r["Amount"]) || 0;
+    });
+    return effect;
   }
 
   function parseDateStr(s) {
@@ -636,19 +770,28 @@
       const data = await res.json();
       donationsData = data.donations || [];
       expensesData = data.expenses || [];
+      fundsData = (data.fundMovements || []).map(r => ({
+        ...r,
+        From: (r["From Person"] || "") + " (" + (r["From Mode"] || "") + ")",
+        To: (r["To Person"] || "") + " (" + (r["To Mode"] || "") + ")",
+      }));
 
       document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
       document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
 
-      const cashInHand = sumByMode(donationsData, "Cash") - sumByMode(expensesData, "Cash");
-      const cashInBank = sumByMode(donationsData, "UPI") - sumByMode(expensesData, "UPI");
+      const cashInHand = sumByMode(donationsData, "Cash") - sumByMode(expensesData, "Cash") + fundEffectOverall(fundsData, "Cash");
+      const cashInBank = sumByMode(donationsData, "UPI") - sumByMode(expensesData, "UPI") + fundEffectOverall(fundsData, "UPI");
       document.getElementById("cashInHand").textContent = fmt(cashInHand);
       document.getElementById("cashInBank").textContent = fmt(cashInBank);
 
-      document.getElementById("amitCash").textContent = fmt(sumByPerson(donationsData, expensesData, "Amit Choudhury", "Cash"));
-      document.getElementById("amitUpi").textContent = fmt(sumByPerson(donationsData, expensesData, "Amit Choudhury", "UPI"));
-      document.getElementById("abhigyanCash").textContent = fmt(sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "Cash"));
-      document.getElementById("abhigyanUpi").textContent = fmt(sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "UPI"));
+      document.getElementById("amitCash").textContent = fmt(
+        sumByPerson(donationsData, expensesData, "Amit Choudhury", "Cash") + fundEffectForPerson(fundsData, "Amit Choudhury", "Cash"));
+      document.getElementById("amitUpi").textContent = fmt(
+        sumByPerson(donationsData, expensesData, "Amit Choudhury", "UPI") + fundEffectForPerson(fundsData, "Amit Choudhury", "UPI"));
+      document.getElementById("abhigyanCash").textContent = fmt(
+        sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "Cash") + fundEffectForPerson(fundsData, "Abhigyan Talukdar", "Cash"));
+      document.getElementById("abhigyanUpi").textContent = fmt(
+        sumByPerson(donationsData, expensesData, "Abhigyan Talukdar", "UPI") + fundEffectForPerson(fundsData, "Abhigyan Talukdar", "UPI"));
 
       updateProgress(data.totalDonations || 0);
       renderCatTotals(donationsData, "Donor Category", "donationCatTotals");
@@ -656,13 +799,17 @@
 
       renderTableHeader("donationHeaderRow", DONATION_COLUMNS, donationSort, onSortDonation);
       renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
+      renderTableHeader("fundHeaderRow", FUND_COLUMNS, fundSort, onSortFund);
       renderDonationsTable();
       renderExpensesTable();
+      renderFundsTable();
     } catch (err) {
       document.getElementById("donationsBody").innerHTML =
         '<tr class="empty-row"><td colspan="6">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
       document.getElementById("expensesBody").innerHTML =
         '<tr class="empty-row"><td colspan="7">Could not load data.</td></tr>';
+      document.getElementById("fundsBody").innerHTML =
+        '<tr class="empty-row"><td colspan="6">Could not load data.</td></tr>';
     }
   }
 
@@ -723,6 +870,13 @@
     else { expenseSort.key = key; expenseSort.dir = "asc"; }
     renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
     renderExpensesTable();
+  }
+
+  function onSortFund(key) {
+    if (fundSort.key === key) fundSort.dir = fundSort.dir === "asc" ? "desc" : "asc";
+    else { fundSort.key = key; fundSort.dir = "asc"; }
+    renderTableHeader("fundHeaderRow", FUND_COLUMNS, fundSort, onSortFund);
+    renderFundsTable();
   }
 
   function applySearchSort(data, searchText, sortState) {
@@ -787,6 +941,24 @@
       </tr>`).join("");
   }
 
+  function renderFundsTable() {
+    const rows = applySearchSort(fundsData, fundSearchText, fundSort);
+    const body = document.getElementById("fundsBody");
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="6">No transfers or conversions recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r["Date"] || ""}</td>
+        <td>${r["Move Type"] || ""}</td>
+        <td>${r["From"] || ""}</td>
+        <td>${r["To"] || ""}</td>
+        <td class="amount">${fmt(r["Amount"])}</td>
+        <td>${r["Note"] || ""}</td>
+      </tr>`).join("");
+  }
+
   document.getElementById("donationSearch").addEventListener("input", (e) => {
     donationSearchText = e.target.value;
     renderDonationsTable();
@@ -794,6 +966,10 @@
   document.getElementById("expenseSearch").addEventListener("input", (e) => {
     expenseSearchText = e.target.value;
     renderExpensesTable();
+  });
+  document.getElementById("fundSearch").addEventListener("input", (e) => {
+    fundSearchText = e.target.value;
+    renderFundsTable();
   });
 
   // ---------- login ----------
@@ -923,6 +1099,72 @@
     }
   }
 
+  async function submitTransfer() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("password").value.trim();
+    const date = document.getElementById("tDate").value;
+    const amount = document.getElementById("tAmount").value;
+    const fromPerson = document.getElementById("tFrom").value;
+    const toPerson = document.getElementById("tTo").value;
+    const mode = document.getElementById("tMode").value;
+    const note = document.getElementById("tNote").value.trim();
+    const msgEl = document.getElementById("tMsg");
+    const btnEl = document.getElementById("tSubmitBtn");
+
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount) {
+      msgEl.textContent = "Please fill date and amount.";
+      msgEl.className = "msg error";
+      return;
+    }
+    if (fromPerson === toPerson) {
+      msgEl.textContent = '"From" and "To" must be different people.';
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const ok = await postEntry({
+      action: "addTransfer", password, date, amount, fromPerson, toPerson, mode, note,
+    }, msgEl, btnEl, "Saving…", "Save Transfer");
+
+    if (ok) {
+      document.getElementById("tAmount").value = "";
+      document.getElementById("tNote").value = "";
+      loadData();
+    }
+  }
+
+  async function submitConversion() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("password").value.trim();
+    const date = document.getElementById("cDate").value;
+    const amount = document.getElementById("cAmount").value;
+    const person = document.getElementById("cPerson").value;
+    const direction = document.getElementById("cDirection").value; // "UPI-Cash" or "Cash-UPI"
+    const note = document.getElementById("cNote").value.trim();
+    const msgEl = document.getElementById("cMsg");
+    const btnEl = document.getElementById("cSubmitBtn");
+
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !amount) {
+      msgEl.textContent = "Please fill date and amount.";
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const [fromMode, toMode] = direction.split("-");
+
+    const ok = await postEntry({
+      action: "addConversion", password, date, amount, person, fromMode, toMode, note,
+    }, msgEl, btnEl, "Saving…", "Save Conversion");
+
+    if (ok) {
+      document.getElementById("cAmount").value = "";
+      document.getElementById("cNote").value = "";
+      loadData();
+    }
+  }
+
   // ---------- WhatsApp share ----------
 
   function shareToWhatsApp() {
@@ -963,6 +1205,8 @@
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("dDate").value = today;
   document.getElementById("eDate").value = today;
+  document.getElementById("tDate").value = today;
+  document.getElementById("cDate").value = today;
 
   loadData();
 </script>
