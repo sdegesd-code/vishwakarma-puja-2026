@@ -274,6 +274,27 @@
   }
   .login-status.ok { color: var(--green); }
   .login-status.bad { color: var(--red); }
+  .photo-preview-wrap { display: none; margin-top: 10px; align-items: center; gap: 10px; }
+  .photo-preview-wrap.show { display: flex; }
+  .photo-preview { max-width: 110px; max-height: 110px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; }
+  .remove-photo-btn {
+    background: #fff;
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .receipt-link {
+    color: var(--blue);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  .receipt-link:hover { text-decoration: underline; }
   button.submit-btn {
     width: 100%;
     padding: 11px;
@@ -420,6 +441,8 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="view">📒 View Accounts</button>
     <button class="tab-btn" data-tab="add">➕ Add Entry</button>
+    <button class="tab-btn" data-tab="books">📕 Receipt Books</button>
+    <button class="tab-btn" data-tab="cashbook">📘 Cash Book</button>
   </div>
 
   <!-- VIEW PANEL -->
@@ -436,7 +459,7 @@
       <thead>
         <tr id="donationHeaderRow"></tr>
       </thead>
-      <tbody id="donationsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      <tbody id="donationsBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
     </table>
     </div>
 
@@ -450,7 +473,7 @@
       <thead>
         <tr id="expenseHeaderRow"></tr>
       </thead>
-      <tbody id="expensesBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
+      <tbody id="expensesBody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
     </table>
     </div>
 
@@ -522,6 +545,14 @@
           <option value="UPI">UPI</option>
         </select>
       </div>
+      <div class="form-row">
+        <label for="dPhoto">Receipt Photo (optional)</label>
+        <input type="file" accept="image/*" id="dPhoto">
+        <div class="photo-preview-wrap" id="dPhotoPreviewWrap">
+          <img class="photo-preview" id="dPhotoPreview" alt="Receipt preview">
+          <button type="button" class="remove-photo-btn" onclick="clearPhoto('d')">Remove photo</button>
+        </div>
+      </div>
       <button class="submit-btn" id="dSubmitBtn" onclick="submitDonation()">Save Donation</button>
       <div class="msg" id="dMsg"></div>
     </div>
@@ -566,6 +597,14 @@
           <option value="Cash">Cash</option>
           <option value="UPI">UPI</option>
         </select>
+      </div>
+      <div class="form-row">
+        <label for="ePhoto">Receipt Photo (optional)</label>
+        <input type="file" accept="image/*" id="ePhoto">
+        <div class="photo-preview-wrap" id="ePhotoPreviewWrap">
+          <img class="photo-preview" id="ePhotoPreview" alt="Receipt preview">
+          <button type="button" class="remove-photo-btn" onclick="clearPhoto('e')">Remove photo</button>
+        </div>
       </div>
       <button class="submit-btn" id="eSubmitBtn" onclick="submitExpense()">Save Expense</button>
       <div class="msg" id="eMsg"></div>
@@ -658,6 +697,122 @@
     </div>
   </div>
 
+  <!-- RECEIPT BOOKS PANEL -->
+  <div class="panel" id="panel-books">
+
+    <div class="form-box">
+      <h3>Committee Login</h3>
+      <div class="form-row">
+        <label for="rPassword">Your password</label>
+        <input type="password" id="rPassword" placeholder="Enter your password">
+      </div>
+      <div class="login-status" id="rLoginStatus"></div>
+    </div>
+
+    <div class="form-box">
+      <h3>Issue a Receipt Book</h3>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="rDate">Date</label>
+          <input type="date" id="rDate">
+        </div>
+        <div class="form-row">
+          <label for="rBookRange">Book Range</label>
+          <select id="rBookRange">
+            <option value="1-11">1-11</option>
+            <option value="12-22">12-22</option>
+            <option value="23-33">23-33</option>
+            <option value="34-44">34-44</option>
+            <option value="45-54">45-54</option>
+            <option value="55-65">55-65</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="rIssuedTo">Issued To</label>
+        <input type="text" id="rIssuedTo" list="committeeNames" placeholder="Name of collector receiving the book">
+      </div>
+      <div class="form-row">
+        <label for="rPhoto">Photo of Receipt Book (required)</label>
+        <input type="file" accept="image/*" id="rPhoto">
+        <div class="photo-preview-wrap" id="rPhotoPreviewWrap">
+          <img class="photo-preview" id="rPhotoPreview" alt="Receipt book preview">
+          <button type="button" class="remove-photo-btn" onclick="clearPhoto('r')">Remove photo</button>
+        </div>
+      </div>
+      <button class="submit-btn" id="rSubmitBtn" onclick="submitReceiptBook()">Save Issuance</button>
+      <div class="msg" id="rMsg"></div>
+    </div>
+
+    <div class="section-title">Receipt Books Issued</div>
+    <div class="search-row">
+      <input type="text" id="bookSearch" placeholder="Search issued books…">
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr id="bookHeaderRow"></tr>
+      </thead>
+      <tbody id="booksBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- CASH BOOK PANEL -->
+  <div class="panel" id="panel-cashbook">
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+    <div class="section-title">Daily Cash Book</div>
+    <p class="ledger-caption">Oldest to newest, with running balance. Includes donations, expenses, and any transfers/conversions affecting Cash.</p>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Date</th><th class="amount">Opening</th><th class="amount">Received</th><th class="amount">Spent</th><th class="amount">Closing</th></tr>
+      </thead>
+      <tbody id="cashLedgerBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+    </table>
+    </div>
+
+    <div class="section-title">Daily Bank (UPI) Book</div>
+    <p class="ledger-caption">Oldest to newest, with running balance. Includes donations, expenses, and any transfers/conversions affecting UPI.</p>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Date</th><th class="amount">Opening</th><th class="amount">Received</th><th class="amount">Spent</th><th class="amount">Closing</th></tr>
+      </thead>
+      <tbody id="bankLedgerBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <datalist id="committeeNames">
+    <option value="Amit Choudhury">
+    <option value="Abhigyan Talukdar">
+    <option value="Joy Gopal Goswami">
+    <option value="Bitu Saha">
+    <option value="Abdur Rezzak">
+    <option value="Rabindra Das">
+    <option value="Ashraful Hussain">
+    <option value="Sankar Ojah">
+    <option value="Suchil Nath">
+    <option value="Jamal Ali Sk">
+    <option value="Sahjubin Rahman">
+    <option value="Piran">
+    <option value="Tupai Sarkar">
+    <option value="Uttam Das">
+    <option value="Ranjit Dey">
+    <option value="Khirat Paul">
+    <option value="Dhruba Lochan Das">
+    <option value="Dimbeswar Baishya">
+    <option value="Tapas">
+    <option value="Piran Krishna Nath">
+    <option value="Rizwan">
+    <option value="Nekib">
+    <option value="Mokibur">
+    <option value="Abdulla Zaman">
+    <option value="Zakir Hussain">
+  </datalist>
+
 </div>
 
 <footer>Sri Sri Vishwakarma Puja, 2026 &middot; Accounts maintained by the Organizing Committee</footer>
@@ -678,6 +833,7 @@
     { key: "Amount", label: "Amount", amount: true },
     { key: "Payment Mode", label: "Mode" },
     { key: "Collected By", label: "Collected By" },
+    { key: "Receipt Link", label: "Receipt", noSort: true },
   ];
   const EXPENSE_COLUMNS = [
     { key: "Date", label: "Date" },
@@ -687,6 +843,7 @@
     { key: "Payment Mode", label: "Mode" },
     { key: "Paid To", label: "Paid To" },
     { key: "Added By", label: "Added By" },
+    { key: "Receipt Link", label: "Receipt", noSort: true },
   ];
   const FUND_COLUMNS = [
     { key: "Date", label: "Date" },
@@ -696,18 +853,74 @@
     { key: "Amount", label: "Amount", amount: true },
     { key: "Note", label: "Note" },
   ];
+  const BOOK_COLUMNS = [
+    { key: "Date", label: "Date" },
+    { key: "Book Range", label: "Book Range" },
+    { key: "Issued To", label: "Issued To" },
+    { key: "Recorded By", label: "Recorded By" },
+    { key: "Photo Link", label: "Photo", noSort: true },
+  ];
 
   let donationsData = [];
   let expensesData = [];
   let fundsData = [];
+  let booksData = [];
   let donationSort = { key: "Date", dir: "desc" };
   let expenseSort = { key: "Date", dir: "desc" };
   let fundSort = { key: "Date", dir: "desc" };
+  let bookSort = { key: "Date", dir: "desc" };
   let donationSearchText = "";
   let expenseSearchText = "";
   let fundSearchText = "";
+  let bookSearchText = "";
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+
+  // ---------- photo capture / compression ----------
+
+  const photoStore = { d: null, e: null, r: null };
+
+  function compressImage(file, maxDim, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handlePhotoSelect(prefix, file) {
+    if (!file) return;
+    compressImage(file, 1280, 0.7, (dataUrl) => {
+      photoStore[prefix] = dataUrl;
+      document.getElementById(prefix + "PhotoPreview").src = dataUrl;
+      document.getElementById(prefix + "PhotoPreviewWrap").classList.add("show");
+    });
+  }
+
+  function clearPhoto(prefix) {
+    photoStore[prefix] = null;
+    const input = document.getElementById(prefix + "Photo");
+    if (input) input.value = "";
+    document.getElementById(prefix + "PhotoPreviewWrap").classList.remove("show");
+  }
+
+  document.getElementById("dPhoto").addEventListener("change", (e) => handlePhotoSelect("d", e.target.files[0]));
+  document.getElementById("ePhoto").addEventListener("change", (e) => handlePhotoSelect("e", e.target.files[0]));
+  document.getElementById("rPhoto").addEventListener("change", (e) => handlePhotoSelect("r", e.target.files[0]));
+
 
   function sumByMode(rows, mode) {
     return rows
@@ -753,6 +966,55 @@
     return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
   }
 
+  // Builds a day-by-day ledger (opening/received/spent/closing) for one
+  // payment mode ("Cash" or "UPI"), folding in donations, expenses, and
+  // any transfers/conversions that touch that mode.
+  function buildDailyLedger(donations, expenses, funds, mode) {
+    const dateMap = {};
+    function ensure(d) {
+      if (!dateMap[d]) dateMap[d] = { received: 0, spent: 0 };
+      return dateMap[d];
+    }
+    donations.forEach(r => {
+      if ((r["Payment Mode"] || "Cash") === mode) ensure(r["Date"]).received += Number(r["Amount"]) || 0;
+    });
+    expenses.forEach(r => {
+      if ((r["Payment Mode"] || "Cash") === mode) ensure(r["Date"]).spent += Number(r["Amount"]) || 0;
+    });
+    funds.forEach(r => {
+      const amt = Number(r["Amount"]) || 0;
+      if (r["To Mode"] === mode) ensure(r["Date"]).received += amt;
+      if (r["From Mode"] === mode) ensure(r["Date"]).spent += amt;
+    });
+
+    const dates = Object.keys(dateMap).sort((a, b) => parseDateStr(a) - parseDateStr(b));
+    let running = 0;
+    return dates.map(d => {
+      const opening = running;
+      const { received, spent } = dateMap[d];
+      const closing = opening + received - spent;
+      running = closing;
+      return { date: d, opening, received, spent, closing };
+    });
+  }
+
+  function renderLedgerTable(rows, tbodyId) {
+    const body = document.getElementById(tbodyId);
+    if (!body) return;
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="5">No transactions recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.date}</td>
+        <td class="amount">${fmt(r.opening)}</td>
+        <td class="amount">${fmt(r.received)}</td>
+        <td class="amount">${fmt(r.spent)}</td>
+        <td class="amount">${fmt(r.closing)}</td>
+      </tr>`).join("");
+  }
+
   function showConfigWarningIfNeeded() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
       document.getElementById("configWarning").style.display = "block";
@@ -775,6 +1037,7 @@
         From: (r["From Person"] || "") + " (" + (r["From Mode"] || "") + ")",
         To: (r["To Person"] || "") + " (" + (r["To Mode"] || "") + ")",
       }));
+      booksData = data.receiptBooks || [];
 
       document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
       document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
@@ -800,16 +1063,23 @@
       renderTableHeader("donationHeaderRow", DONATION_COLUMNS, donationSort, onSortDonation);
       renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
       renderTableHeader("fundHeaderRow", FUND_COLUMNS, fundSort, onSortFund);
+      renderTableHeader("bookHeaderRow", BOOK_COLUMNS, bookSort, onSortBook);
       renderDonationsTable();
       renderExpensesTable();
       renderFundsTable();
+      renderBooksTable();
+
+      renderLedgerTable(buildDailyLedger(donationsData, expensesData, fundsData, "Cash"), "cashLedgerBody");
+      renderLedgerTable(buildDailyLedger(donationsData, expensesData, fundsData, "UPI"), "bankLedgerBody");
     } catch (err) {
       document.getElementById("donationsBody").innerHTML =
-        '<tr class="empty-row"><td colspan="6">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
+        '<tr class="empty-row"><td colspan="7">Could not load data. Check APPS_SCRIPT_URL / your internet connection.</td></tr>';
       document.getElementById("expensesBody").innerHTML =
-        '<tr class="empty-row"><td colspan="7">Could not load data.</td></tr>';
+        '<tr class="empty-row"><td colspan="8">Could not load data.</td></tr>';
       document.getElementById("fundsBody").innerHTML =
         '<tr class="empty-row"><td colspan="6">Could not load data.</td></tr>';
+      document.getElementById("booksBody").innerHTML =
+        '<tr class="empty-row"><td colspan="5">Could not load data.</td></tr>';
     }
   }
 
@@ -850,10 +1120,11 @@
     const row = document.getElementById(rowId);
     row.innerHTML = columns.map(col => {
       const arrow = sortState.key === col.key ? (sortState.dir === "asc" ? "▲" : "▼") : "";
-      const cls = "sortable" + (col.amount ? " amount" : "");
-      return `<th class="${cls}" data-key="${col.key}">${col.label}<span class="arrow">${arrow}</span></th>`;
+      const cls = (col.noSort ? "" : "sortable") + (col.amount ? " amount" : "");
+      return `<th class="${cls}" data-key="${col.key}">${col.label}${col.noSort ? "" : '<span class="arrow">' + arrow + "</span>"}</th>`;
     }).join("");
     Array.from(row.children).forEach((th, i) => {
+      if (columns[i].noSort) return;
       th.addEventListener("click", () => clickHandler(columns[i].key));
     });
   }
@@ -877,6 +1148,13 @@
     else { fundSort.key = key; fundSort.dir = "asc"; }
     renderTableHeader("fundHeaderRow", FUND_COLUMNS, fundSort, onSortFund);
     renderFundsTable();
+  }
+
+  function onSortBook(key) {
+    if (bookSort.key === key) bookSort.dir = bookSort.dir === "asc" ? "desc" : "asc";
+    else { bookSort.key = key; bookSort.dir = "asc"; }
+    renderTableHeader("bookHeaderRow", BOOK_COLUMNS, bookSort, onSortBook);
+    renderBooksTable();
   }
 
   function applySearchSort(data, searchText, sortState) {
@@ -904,11 +1182,16 @@
     return rows;
   }
 
+  function receiptLinkHtml(url) {
+    if (!url) return '<span style="color:#c0aa8e;">—</span>';
+    return `<a class="receipt-link" href="${url}" target="_blank" rel="noopener">📷 View</a>`;
+  }
+
   function renderDonationsTable() {
     const rows = applySearchSort(donationsData, donationSearchText, donationSort);
     const body = document.getElementById("donationsBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="6">No matching donations.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">No matching donations.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
@@ -919,6 +1202,7 @@
         <td class="amount">${fmt(r["Amount"])}</td>
         <td>${r["Payment Mode"] || ""}</td>
         <td>${r["Collected By"] || ""}</td>
+        <td>${receiptLinkHtml(r["Receipt Link"])}</td>
       </tr>`).join("");
   }
 
@@ -926,7 +1210,7 @@
     const rows = applySearchSort(expensesData, expenseSearchText, expenseSort);
     const body = document.getElementById("expensesBody");
     if (!rows.length) {
-      body.innerHTML = '<tr class="empty-row"><td colspan="7">No matching expenses.</td></tr>';
+      body.innerHTML = '<tr class="empty-row"><td colspan="8">No matching expenses.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(r => `
@@ -938,6 +1222,7 @@
         <td>${r["Payment Mode"] || ""}</td>
         <td>${r["Paid To"] || ""}</td>
         <td>${r["Added By"] || ""}</td>
+        <td>${receiptLinkHtml(r["Receipt Link"])}</td>
       </tr>`).join("");
   }
 
@@ -959,6 +1244,23 @@
       </tr>`).join("");
   }
 
+  function renderBooksTable() {
+    const rows = applySearchSort(booksData, bookSearchText, bookSort);
+    const body = document.getElementById("booksBody");
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="5">No receipt books issued yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r["Date"] || ""}</td>
+        <td>${r["Book Range"] || ""}</td>
+        <td>${r["Issued To"] || ""}</td>
+        <td>${r["Recorded By"] || ""}</td>
+        <td>${receiptLinkHtml(r["Photo Link"])}</td>
+      </tr>`).join("");
+  }
+
   document.getElementById("donationSearch").addEventListener("input", (e) => {
     donationSearchText = e.target.value;
     renderDonationsTable();
@@ -971,20 +1273,31 @@
     fundSearchText = e.target.value;
     renderFundsTable();
   });
+  document.getElementById("bookSearch").addEventListener("input", (e) => {
+    bookSearchText = e.target.value;
+    renderBooksTable();
+  });
 
   // ---------- login ----------
 
   let loginCheckTimer = null;
   document.getElementById("password").addEventListener("input", (e) => {
-    const statusEl = document.getElementById("loginStatus");
-    const pwd = e.target.value.trim();
-    clearTimeout(loginCheckTimer);
-    if (!pwd) { statusEl.textContent = ""; statusEl.className = "login-status"; return; }
-    loginCheckTimer = setTimeout(() => checkLogin(pwd), 400);
+    handlePasswordInput(e.target.value, "loginStatus");
+  });
+  document.getElementById("rPassword").addEventListener("input", (e) => {
+    handlePasswordInput(e.target.value, "rLoginStatus");
   });
 
-  async function checkLogin(pwd) {
-    const statusEl = document.getElementById("loginStatus");
+  function handlePasswordInput(rawValue, statusElId) {
+    const statusEl = document.getElementById(statusElId);
+    const pwd = rawValue.trim();
+    clearTimeout(loginCheckTimer);
+    if (!pwd) { statusEl.textContent = ""; statusEl.className = "login-status"; return; }
+    loginCheckTimer = setTimeout(() => checkLogin(pwd, statusElId), 400);
+  }
+
+  async function checkLogin(pwd, statusElId) {
+    const statusEl = document.getElementById(statusElId);
     if (showConfigWarningIfNeeded()) return;
     try {
       const res = await fetch(APPS_SCRIPT_URL, {
@@ -1059,11 +1372,14 @@
 
     const ok = await postEntry({
       action: "addDonation", password, date, amount, donorName, donorCategory, paymentMode,
+      photoData: photoStore.d ? photoStore.d.split(",")[1] : undefined,
+      photoMime: photoStore.d ? "image/jpeg" : undefined,
     }, msgEl, btnEl, "Saving…", "Save Donation");
 
     if (ok) {
       document.getElementById("dAmount").value = "";
       document.getElementById("dName").value = "";
+      clearPhoto("d");
       loadData();
     }
   }
@@ -1089,12 +1405,15 @@
 
     const ok = await postEntry({
       action: "addExpense", password, date, amount, category, description, paidTo, paymentMode,
+      photoData: photoStore.e ? photoStore.e.split(",")[1] : undefined,
+      photoMime: photoStore.e ? "image/jpeg" : undefined,
     }, msgEl, btnEl, "Saving…", "Save Expense");
 
     if (ok) {
       document.getElementById("eAmount").value = "";
       document.getElementById("eDescription").value = "";
       document.getElementById("ePaidTo").value = "";
+      clearPhoto("e");
       loadData();
     }
   }
@@ -1165,6 +1484,38 @@
     }
   }
 
+  async function submitReceiptBook() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("rPassword").value.trim();
+    const date = document.getElementById("rDate").value;
+    const bookRange = document.getElementById("rBookRange").value;
+    const issuedTo = document.getElementById("rIssuedTo").value;
+    const msgEl = document.getElementById("rMsg");
+    const btnEl = document.getElementById("rSubmitBtn");
+
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !bookRange || !issuedTo) {
+      msgEl.textContent = "Please fill date, book range and issued-to.";
+      msgEl.className = "msg error";
+      return;
+    }
+    if (!photoStore.r) {
+      msgEl.textContent = "A photo of the receipt book is required.";
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const ok = await postEntry({
+      action: "addReceiptBook", password, date, bookRange, issuedTo,
+      photoData: photoStore.r.split(",")[1], photoMime: "image/jpeg",
+    }, msgEl, btnEl, "Saving…", "Save Issuance");
+
+    if (ok) {
+      clearPhoto("r");
+      loadData();
+    }
+  }
+
   // ---------- WhatsApp share ----------
 
   function shareToWhatsApp() {
@@ -1207,6 +1558,7 @@
   document.getElementById("eDate").value = today;
   document.getElementById("tDate").value = today;
   document.getElementById("cDate").value = today;
+  document.getElementById("rDate").value = today;
 
   loadData();
 </script>
