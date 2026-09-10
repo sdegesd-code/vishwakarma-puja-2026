@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vishwakarma Puja 2026 — Accounts</title>
+<script>
+  // Applied immediately, before CSS paints, to avoid a light-mode flash.
+  (function () {
+    try {
+      const saved = localStorage.getItem("puja_theme");
+      if (saved === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    } catch (e) {}
+  })();
+</script>
 <style>
   :root {
     --orange: #C1440E;
@@ -16,13 +25,46 @@
     --blue: #1E6FA6;
     --border: #E8C9A0;
     --whatsapp: #25D366;
+    --bg-page: #FFF9F3;
+    --bg-card: #ffffff;
+    --muted-text: var(--muted-text);
+  }
+  [data-theme="dark"] {
+    --dark-orange: #E8895F;
+    --text-dark: #F0E6DA;
+    --border: #4A3826;
+    --bg-page: #1B140F;
+    --bg-card: #2A2019;
+    --muted-text: #C7A886;
+    --light-bg: #33261A;
+    --green: #4CAF6D;
+    --red: #E5766B;
+    --blue: #6BB3E0;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    background: #FFF9F3;
+    background: var(--bg-page);
     color: var(--text-dark);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 50;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   header {
     background: linear-gradient(135deg, var(--orange), var(--dark-orange));
@@ -52,7 +94,7 @@
     margin: -20px 0 16px;
   }
   .card {
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 16px 10px;
@@ -63,7 +105,7 @@
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #8a6a4d;
+    color: var(--muted-text);
     margin-bottom: 6px;
   }
   .card .value {
@@ -76,7 +118,7 @@
   .card.upi .value { color: var(--blue); }
 
   .progress-box {
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 16px;
@@ -105,7 +147,7 @@
   }
   .progress-note {
     font-size: 0.78rem;
-    color: #8a6a4d;
+    color: var(--muted-text);
     margin-top: 6px;
     text-align: right;
   }
@@ -136,7 +178,7 @@
     min-width: 120px;
     padding: 10px 14px;
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--bg-card);
     color: var(--dark-orange);
     border-radius: 8px;
     cursor: pointer;
@@ -162,13 +204,15 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 0.88rem;
+    background: var(--bg-card);
+    color: var(--text-dark);
   }
 
   table {
     width: 100%;
     min-width: 480px;
     border-collapse: collapse;
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -200,7 +244,7 @@
   td.amount, th.amount { text-align: right; white-space: nowrap; }
   .empty-row td {
     text-align: center;
-    color: #a08765;
+    color: var(--muted-text);
     font-style: italic;
     padding: 18px;
   }
@@ -212,7 +256,7 @@
     margin-bottom: 20px;
   }
   .cat-card {
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 12px;
@@ -220,7 +264,7 @@
   }
   .cat-card .cname {
     font-size: 0.76rem;
-    color: #8a6a4d;
+    color: var(--muted-text);
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
@@ -235,7 +279,7 @@
   .person-table td:first-child, .person-table th:first-child { text-align: left; }
 
   .form-box {
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 18px;
@@ -254,13 +298,15 @@
     font-size: 0.82rem;
     font-weight: 600;
     margin-bottom: 4px;
-    color: #6b4a2c;
+    color: var(--muted-text);
   }
   .form-row input, .form-row select {
     padding: 9px 10px;
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 0.95rem;
+    background: var(--bg-card);
+    color: var(--text-dark);
   }
   .two-col {
     display: grid;
@@ -278,7 +324,7 @@
   .photo-preview-wrap.show { display: flex; }
   .photo-preview { max-width: 110px; max-height: 110px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; }
   .remove-photo-btn {
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--red);
     color: var(--red);
     border-radius: 6px;
@@ -329,7 +375,7 @@
     margin-bottom: 14px;
     padding: 8px 14px;
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -348,7 +394,7 @@
   footer {
     text-align: center;
     font-size: 0.78rem;
-    color: #a08765;
+    color: var(--muted-text);
     padding: 10px 0 30px;
   }
   @media print {
@@ -372,6 +418,8 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
 
 <header>
   <h1>SRI SRI VISHWAKARMA PUJA — 2026</h1>
@@ -414,6 +462,9 @@
     </div>
     <div class="progress-note" id="progressNote"></div>
   </div>
+
+  <div class="section-title">🏆 Highlights</div>
+  <div class="cat-totals" id="highlightsBox"></div>
 
   <div class="section-title">Treasurer-wise Cash Position</div>
   <div class="table-wrap">
@@ -489,6 +540,19 @@
       <tbody id="fundsBody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
     </table>
     </div>
+
+    <div class="section-title">Correction Log</div>
+    <div class="search-row">
+      <input type="text" id="correctionSearch" placeholder="Search correction log…">
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr id="correctionHeaderRow"></tr>
+      </thead>
+      <tbody id="correctionsBody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
+    </table>
+    </div>
   </div>
 
   <!-- ADD PANEL -->
@@ -508,6 +572,7 @@
       <button class="tab-btn" data-subtab="expense">Add Expense</button>
       <button class="tab-btn" data-subtab="transfer">Transfer</button>
       <button class="tab-btn" data-subtab="convert">Convert</button>
+      <button class="tab-btn" data-subtab="correction">Correction</button>
     </div>
 
     <div class="form-box subpanel active" id="sub-donation">
@@ -612,7 +677,7 @@
 
     <div class="form-box subpanel" id="sub-transfer">
       <h3>Fund Transfer (between Amit &amp; Abhigyan)</h3>
-      <p style="font-size:0.82rem; color:#8a6a4d; margin-top:-6px;">
+      <p style="font-size:0.82rem; color:var(--muted-text); margin-top:-6px;">
         Use this when one of you physically hands cash/UPI to the other. It does
         <strong>not</strong> change the overall totals — only whose balance it sits under.
       </p>
@@ -659,7 +724,7 @@
 
     <div class="form-box subpanel" id="sub-convert">
       <h3>Cash ⇄ Bank (UPI) Conversion</h3>
-      <p style="font-size:0.82rem; color:#8a6a4d; margin-top:-6px;">
+      <p style="font-size:0.82rem; color:var(--muted-text); margin-top:-6px;">
         Use this when you withdraw UPI money as physical cash, or deposit cash into
         the account. This adjusts the overall Cash/UPI split — original donation and
         expense records are never changed.
@@ -694,6 +759,57 @@
       </div>
       <button class="submit-btn" id="cSubmitBtn" onclick="submitConversion()">Save Conversion</button>
       <div class="msg" id="cMsg"></div>
+    </div>
+
+    <div class="form-box subpanel" id="sub-correction">
+      <h3>Log a Correction</h3>
+      <p style="font-size:0.82rem; color:var(--muted-text); margin-top:-6px;">
+        The actual fix still happens directly in the Google Sheet — this just
+        keeps a clear record of what was changed and why, instead of a silent edit.
+      </p>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="xDate">Date</label>
+          <input type="date" id="xDate">
+        </div>
+        <div class="form-row">
+          <label for="xEntryType">Entry Type</label>
+          <select id="xEntryType">
+            <option value="Donation">Donation</option>
+            <option value="Expense">Expense</option>
+            <option value="Transfer">Transfer</option>
+            <option value="Conversion">Conversion</option>
+            <option value="Receipt Book">Receipt Book</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="xReference">Which entry? (e.g. donor name + date)</label>
+        <input type="text" id="xReference" placeholder="e.g. Ramesh Shop donation on 05-09-2026">
+      </div>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="xFieldChanged">Field changed (optional)</label>
+          <input type="text" id="xFieldChanged" placeholder="e.g. Amount">
+        </div>
+        <div class="form-row"></div>
+      </div>
+      <div class="two-col">
+        <div class="form-row">
+          <label for="xOldValue">Old value (optional)</label>
+          <input type="text" id="xOldValue" placeholder="e.g. ₹2,000">
+        </div>
+        <div class="form-row">
+          <label for="xNewValue">New value (optional)</label>
+          <input type="text" id="xNewValue" placeholder="e.g. ₹2,500">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="xReason">Reason for correction</label>
+        <input type="text" id="xReason" placeholder="e.g. amount was misheard during collection">
+      </div>
+      <button class="submit-btn" id="xSubmitBtn" onclick="submitCorrection()">Save Correction Log</button>
+      <div class="msg" id="xMsg"></div>
     </div>
   </div>
 
@@ -811,6 +927,12 @@
     <option value="Mokibur">
     <option value="Abdulla Zaman">
     <option value="Zakir Hussain">
+    <option value="Karan Paul">
+    <option value="Jeherul">
+    <option value="Fazlul Hoque">
+    <option value="Jeherul Islam">
+    <option value="Ahsanul Aktar">
+    <option value="Wadud">
   </datalist>
 
 </div>
@@ -821,7 +943,7 @@
   // ============================================================
   // SET THIS to your deployed Google Apps Script Web App URL.
   // ============================================================
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUXghb_NQC-ZqxF-ckMrVt4CWl0WNBSEUob3CG-Vvavvq278Ryt-RwXA7W9MF664Pk/exec";
+  const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
   const TARGET_AMOUNT = 250000;
   const PERSON_NAMES = ["Amit Choudhury", "Abhigyan Talukdar"];
@@ -860,21 +982,57 @@
     { key: "Recorded By", label: "Recorded By" },
     { key: "Photo Link", label: "Photo", noSort: true },
   ];
+  const CORRECTION_COLUMNS = [
+    { key: "Date", label: "Date" },
+    { key: "Entry Type", label: "Type" },
+    { key: "Reference", label: "Entry" },
+    { key: "Field Changed", label: "Field" },
+    { key: "Old Value", label: "Old" },
+    { key: "New Value", label: "New" },
+    { key: "Reason", label: "Reason" },
+    { key: "Recorded By", label: "Recorded By" },
+  ];
 
   let donationsData = [];
   let expensesData = [];
   let fundsData = [];
   let booksData = [];
+  let correctionsData = [];
   let donationSort = { key: "Date", dir: "desc" };
   let expenseSort = { key: "Date", dir: "desc" };
   let fundSort = { key: "Date", dir: "desc" };
   let bookSort = { key: "Date", dir: "desc" };
+  let correctionSort = { key: "Date", dir: "desc" };
   let donationSearchText = "";
   let expenseSearchText = "";
   let fundSearchText = "";
   let bookSearchText = "";
+  let correctionSearchText = "";
 
   const fmt = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+
+  // ---------- dark mode ----------
+
+  function updateThemeToggleIcon() {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const btn = document.getElementById("themeToggle");
+    if (btn) btn.textContent = isDark ? "☀️" : "🌙";
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    if (isDark) {
+      document.documentElement.removeAttribute("data-theme");
+      try { localStorage.setItem("puja_theme", "light"); } catch (e) {}
+    } else {
+      document.documentElement.setAttribute("data-theme", "dark");
+      try { localStorage.setItem("puja_theme", "dark"); } catch (e) {}
+    }
+    updateThemeToggleIcon();
+  }
+
+  updateThemeToggleIcon();
+
 
   // ---------- photo capture / compression ----------
 
@@ -1038,6 +1196,7 @@
         To: (r["To Person"] || "") + " (" + (r["To Mode"] || "") + ")",
       }));
       booksData = data.receiptBooks || [];
+      correctionsData = data.corrections || [];
 
       document.getElementById("totalDonations").textContent = fmt(data.totalDonations);
       document.getElementById("totalExpenses").textContent = fmt(data.totalExpenses);
@@ -1059,15 +1218,18 @@
       updateProgress(data.totalDonations || 0);
       renderCatTotals(donationsData, "Donor Category", "donationCatTotals");
       renderCatTotals(expensesData, "Category", "expenseCatTotals");
+      renderHighlights(donationsData);
 
       renderTableHeader("donationHeaderRow", DONATION_COLUMNS, donationSort, onSortDonation);
       renderTableHeader("expenseHeaderRow", EXPENSE_COLUMNS, expenseSort, onSortExpense);
       renderTableHeader("fundHeaderRow", FUND_COLUMNS, fundSort, onSortFund);
       renderTableHeader("bookHeaderRow", BOOK_COLUMNS, bookSort, onSortBook);
+      renderTableHeader("correctionHeaderRow", CORRECTION_COLUMNS, correctionSort, onSortCorrection);
       renderDonationsTable();
       renderExpensesTable();
       renderFundsTable();
       renderBooksTable();
+      renderCorrectionsTable();
 
       renderLedgerTable(buildDailyLedger(donationsData, expensesData, fundsData, "Cash"), "cashLedgerBody");
       renderLedgerTable(buildDailyLedger(donationsData, expensesData, fundsData, "UPI"), "bankLedgerBody");
@@ -1080,6 +1242,8 @@
         '<tr class="empty-row"><td colspan="6">Could not load data.</td></tr>';
       document.getElementById("booksBody").innerHTML =
         '<tr class="empty-row"><td colspan="5">Could not load data.</td></tr>';
+      document.getElementById("correctionsBody").innerHTML =
+        '<tr class="empty-row"><td colspan="7">Could not load data.</td></tr>';
     }
   }
 
@@ -1155,6 +1319,13 @@
     else { bookSort.key = key; bookSort.dir = "asc"; }
     renderTableHeader("bookHeaderRow", BOOK_COLUMNS, bookSort, onSortBook);
     renderBooksTable();
+  }
+
+  function onSortCorrection(key) {
+    if (correctionSort.key === key) correctionSort.dir = correctionSort.dir === "asc" ? "desc" : "asc";
+    else { correctionSort.key = key; correctionSort.dir = "asc"; }
+    renderTableHeader("correctionHeaderRow", CORRECTION_COLUMNS, correctionSort, onSortCorrection);
+    renderCorrectionsTable();
   }
 
   function applySearchSort(data, searchText, sortState) {
@@ -1261,6 +1432,56 @@
       </tr>`).join("");
   }
 
+  function renderCorrectionsTable() {
+    const rows = applySearchSort(correctionsData, correctionSearchText, correctionSort);
+    const body = document.getElementById("correctionsBody");
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="7">No corrections logged.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r["Date"] || ""}</td>
+        <td>${r["Entry Type"] || ""}</td>
+        <td>${r["Reference"] || ""}</td>
+        <td>${r["Field Changed"] || ""}</td>
+        <td>${r["Old Value"] || ""}</td>
+        <td>${r["New Value"] || ""}</td>
+        <td>${r["Reason"] || ""}</td>
+        <td>${r["Recorded By"] || ""}</td>
+      </tr>`).join("");
+  }
+
+  function renderHighlights(donations) {
+    const box = document.getElementById("highlightsBox");
+    if (!box) return;
+    if (!donations.length) {
+      box.innerHTML = '<div class="cat-card"><div class="cname">No donations yet</div><div class="cvalue">—</div></div>';
+      return;
+    }
+    const byDonor = {};
+    donations.forEach(r => {
+      const donor = r["Donor Name"] || "Unknown";
+      byDonor[donor] = (byDonor[donor] || 0) + (Number(r["Amount"]) || 0);
+    });
+    const topDonors = Object.entries(byDonor).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const largest = donations.reduce((max, r) => (Number(r["Amount"]) || 0) > (Number(max["Amount"]) || 0) ? r : max, donations[0]);
+
+    let html = topDonors.map(([donor, amt], i) => `
+      <div class="cat-card">
+        <div class="cname">#${i + 1} Top Donor</div>
+        <div class="cvalue">${donor}</div>
+        <div class="cname" style="margin-top:4px;">${fmt(amt)}</div>
+      </div>`).join("");
+    html += `
+      <div class="cat-card">
+        <div class="cname">Largest Single Contribution</div>
+        <div class="cvalue">${fmt(largest["Amount"])}</div>
+        <div class="cname" style="margin-top:4px;">${largest["Donor Name"] || ""}</div>
+      </div>`;
+    box.innerHTML = html;
+  }
+
   document.getElementById("donationSearch").addEventListener("input", (e) => {
     donationSearchText = e.target.value;
     renderDonationsTable();
@@ -1276,6 +1497,10 @@
   document.getElementById("bookSearch").addEventListener("input", (e) => {
     bookSearchText = e.target.value;
     renderBooksTable();
+  });
+  document.getElementById("correctionSearch").addEventListener("input", (e) => {
+    correctionSearchText = e.target.value;
+    renderCorrectionsTable();
   });
 
   // ---------- login ----------
@@ -1516,6 +1741,41 @@
     }
   }
 
+  async function submitCorrection() {
+    if (showConfigWarningIfNeeded()) return;
+    const password = document.getElementById("password").value.trim();
+    const date = document.getElementById("xDate").value;
+    const entryType = document.getElementById("xEntryType").value;
+    const reference = document.getElementById("xReference").value.trim();
+    const fieldChanged = document.getElementById("xFieldChanged").value.trim();
+    const oldValue = document.getElementById("xOldValue").value.trim();
+    const newValue = document.getElementById("xNewValue").value.trim();
+    const reason = document.getElementById("xReason").value.trim();
+    const msgEl = document.getElementById("xMsg");
+    const btnEl = document.getElementById("xSubmitBtn");
+
+    if (!password) { msgEl.textContent = "Enter your password."; msgEl.className = "msg error"; return; }
+    if (!date || !reference || !reason) {
+      msgEl.textContent = "Please fill date, which entry, and the reason.";
+      msgEl.className = "msg error";
+      return;
+    }
+
+    const ok = await postEntry({
+      action: "addCorrection", password, date, entryType, reference,
+      fieldChanged, oldValue, newValue, reason,
+    }, msgEl, btnEl, "Saving…", "Save Correction Log");
+
+    if (ok) {
+      document.getElementById("xReference").value = "";
+      document.getElementById("xFieldChanged").value = "";
+      document.getElementById("xOldValue").value = "";
+      document.getElementById("xNewValue").value = "";
+      document.getElementById("xReason").value = "";
+      loadData();
+    }
+  }
+
   // ---------- WhatsApp share ----------
 
   function shareToWhatsApp() {
@@ -1559,6 +1819,7 @@
   document.getElementById("tDate").value = today;
   document.getElementById("cDate").value = today;
   document.getElementById("rDate").value = today;
+  document.getElementById("xDate").value = today;
 
   loadData();
 </script>
